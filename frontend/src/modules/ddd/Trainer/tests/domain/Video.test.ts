@@ -1,5 +1,5 @@
 // tests/domain/Video.test.ts
-import { Video } from '../../Video';
+import { Video } from '../../domain/Video';
 
 describe('Video Entity', () => {
     // arrange
