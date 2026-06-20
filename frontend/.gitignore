@@ -1,0 +1,23 @@
+# Dependencias (NUNCA se suben)
+node_modules/
+/dist
+/out
+
+# Logs de error
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Configuración local de editores (VS Code, etc.)
+.vscode/
+.idea/
+*.suo
+*.ntvs
+*.njsproj
+*.sln
+*.swp
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
