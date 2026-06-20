@@ -1,176 +1,55 @@
-Trainer App — README (TDD + DDD Hexagonal)
-Aplicación web SPA estilo Netflix para entrenadores
-Frontend puro (sin backend), arquitectura hexagonal por capas.
-TDD estricto: NO se toca lógica sin test RED previo.
+# Trainer App — Dashboard con Video Real
 
-:warning: REGLAS OBLIGATORIAS
-Antes de tocar código, leer SIEMPRE:
-TDD strict — los 6 pasos del workflow:
-ANÁLISIS (≤5 min, pattern compliance)
-RED — escribir SOLO tests, parar y esperar verificación
-GREEN — implementación mínima, parar y esperar verificación
-VERIFICAR INTEGRACIÓN
-DEBUG LOGS si hace falta
-PROBAR EN REAL
+Aplicación web de página única (SPA) para entrenadores que permite asignar entrenamientos a atletas en un calendario mensual y adjuntar un vídeo real (desde el propio ordenador) a cada entrenamiento, reproduciéndolo después en un reproductor integrado.
 
+## Descripción
 
-NUNCA escribir test + implementación en el mismo turno
-NUNCA saltar RED → GREEN sin confirmación del usuario
-NUNCA auto-commit
+La app muestra un calendario navegable por mes y año. Al seleccionar un día, el entrenador puede:
 
-DDD hexagonal — domain no importa de application ni infrastructure. NUNCA. Tests de domain SOLO importan domain.
-NO se toca lógica sin test previo.
-Coding standards (frontend TS):
+- Asignar un entrenamiento a un atleta (nombre, ejercicio/notas).
+- Subir un archivo de vídeo local (`.mp4`, `.mov`) asociado a ese entrenamiento.
+- Ver el listado de entrenamientos del día seleccionado, con acceso directo a reproducir el vídeo cargado.
+- Reproducir el vídeo en un reproductor `<video>` integrado en la propia página, sin necesidad de subirlo a ningún servidor.
 
-camelCase+ suffixes (*List,*Map,is*,*Message,*Config)
-English en domain (noentrenamientos, sítrainingList)
-NO optional chaining (?.) en.vue/HTML — usar(obj && obj.prop)
-NOvar— soloconst/let
-NOany(excepto mocks en tests)
-Result objects, NUNCA dicts:result.isValidnoresult['isValid']
-NO spread en parsers — mapeo explícito campo a campo
-Tests AAA:// arrange / // act / // assert
-Un test = un comportamiento
+Todo el estado (entrenamientos, archivos, fecha seleccionada) vive en memoria en el navegador durante la sesión; no hay backend ni base de datos persistente en esta versión.
 
+## Tecnologías utilizadas
 
-Stack
+- **HTML5** — estructura de la página y elemento `<video>` nativo para la reproducción de los clips.
+- **Tailwind CSS** (vía CDN, `cdn.tailwindcss.com`) — todo el sistema de diseño (colores, espaciados, grid, estados hover/focus, modal, etc.) usando exclusivamente clases utilitarias, sin hojas de estilo propias.
+- **JavaScript (vainilla, ES6+)** — toda la lógica de la aplicación: renderizado dinámico del calendario, gestión de estado, manejo de eventos y validaciones, sin frameworks (no usa React, Vue, etc.).
+- **File API / `URL.createObjectURL()`** — mecanismo clave de la app: convierte el archivo de vídeo seleccionado localmente en una URL de tipo *blob* que el navegador puede reproducir directamente, sin subir el archivo a ningún servidor.
+- **DOM API** — creación y actualización dinámica de los elementos del calendario, la lista de entrenamientos y el modal, mediante manipulación directa del DOM (`innerHTML`, `createElement`, etc.).
 
-HTML5+<video>nativo
-Tailwind CSSvía CDN (cdn.tailwindcss.com) — solo utilidades, sin build
-TypeScript— domain + application; transpilado a JS
-Jest— tests unitarios de domain y application
-DOM API + File API + URL.createObjectURL()— infrastructure
-NO hay framework. NO hay backend. NO hay localStorage en MVP.
+No se utiliza ningún framework de frontend, ningún backend, ni almacenamiento persistente (localStorage/sessionStorage/base de datos); todo el "guardado" es una simulación en memoria (`let database = {}`) que se pierde al recargar la página.
 
-Arquitectura hexagonal
-Ttrainer-app/
-├── index.html                    # solo wiring + Tailwind CDN — sin lógica
-├── src/
-│   ├── domain/                   # ENTITIES + PORTS, cero dependencias externas
-│   │   ├── Video.ts              # entity (id, athleteName, category, date, fileName, blobUrl)
-│   │   ├── Category.ts           # value object (Fuerza | Cardio | Técnica | Movilidad | Recuperación)
-│   │   ├── VideoRepository.ts    # interface (port): saveVideo, findByDate, findAll
-│   │   └── functions/
-│   │       ├── filterByDate.ts        # función pura
-│   │       ├── groupByCategory.ts     # función pura
-│   │       └── formatDate.ts          # función pura
-│   │
-│   ├── application/              # USE CASES, importa solo domain
-│   │   ├── AddVideoCommand.ts
-│   │   ├── LoadVideosByDateQuery.ts
-│   │   └── TrainerApplication.ts # constructor(repo)
-│   │
-│   ├── infrastructure/           # ADAPTERS, implementa ports + DOM
-│   │   ├── InMemoryVideoRepository.ts   # implementa VideoRepository
-│   │   ├── BlobUrlVideoStorage.ts       # URL.createObjectURL adapter
-│   │   └── ThumbnailGenerator.ts        # extrae frame del vídeo
-│   │
-│   └── components/               # UI — DOM puro, importa application + domain
-│       ├── HomeComponent.ts             # hero + filas Netflix-style
-│       ├── CalendarPopupComponent.ts    # modal calendar
-│       ├── UploadModalComponent.ts      # form add video
-│       └── VideoPlayerComponent.ts
-│
-└── tests/
-    ├── domain/
-    │   ├── Video.test.ts
-    │   ├── Category.test.ts
-    │   ├── functions/
-    │   │   ├── filterByDate.test.ts
-    │   │   ├── groupByCategory.test.ts
-    │   │   └── formatDate.test.ts
-    ├── application/
-    │   ├── AddVideoCommand.test.ts
-    │   ├── LoadVideosByDateQuery.test.ts
-    │   └── TrainerApplication.test.ts
-    └── infrastructure/
-        ├── InMemoryVideoRepository.test.ts
-        └── BlobUrlVideoStorage.test.tsReglas de imports
-CapaPuede importardomainNADA externo (solo otros archivos de domain)applicationdomaininfrastructuredomain (implementa ports)componentsapplication + domain
-PROHIBIDO: domain importar infrastructure o application. NUNCA.
+## Estructura de archivos
 
-Roadmap por fases TDD
-Cada fase: RED → user verifica → GREEN → user verifica.Fase 1 — Domain (entities + functions puras)
+```
+.
+└── index.html   # Aplicación completa (HTML + Tailwind vía CDN + JS embebido)
+```
 
-RED 1Video.test.ts— entity validación, factory,toPrimitive/fromPrimitive
-GREEN 1Video.ts
-RED 2Category.test.ts— value object inmutable, valores válidos
-GREEN 2Category.ts
-RED 3filterByDate.test.ts— función pura: filtra videos por fecha (compara año/mes/día)
-GREEN 3filterByDate.ts
-RED 4groupByCategory.test.ts— función pura: agrupa videos en{categoria: Video[]}
-GREEN 4groupByCategory.ts
-RED 5formatDate.test.ts— función pura: format largo y corto en español
-Fase 2 — Application (use cases con MemoryRepo)
+## Funcionalidades principales
 
-REDAddVideoCommand.test.ts— handler persiste video en repo
-REDLoadVideosByDateQuery.test.ts— handler devuelve videos agrupados por categoría para una fecha
-GREENimplementación de handlers
-Fase 3 — Infrastructure
+| Funcionalidad | Descripción |
+|---|---|
+| Calendario mensual | Navegación por mes/año (2025–2027) con resaltado del día seleccionado |
+| Asignación de entrenos | Modal para introducir atleta, ejercicio y vídeo asociado |
+| Carga de vídeo local | Selector de archivo con barra de progreso simulada |
+| Reproductor integrado | Reproduce el vídeo subido directamente desde el navegador (blob URL) |
+| Listado diario | Muestra todos los entrenamientos asignados al día activo |
 
-REDInMemoryVideoRepository.test.ts— implementaVideoRepository, in-memory
-REDBlobUrlVideoStorage.test.ts— wrapper deURL.createObjectURL
-GREENimplementaciones
-Fase 4 — UI / index.html
+## Limitaciones conocidas
 
-Hero + filas horizontales (Tailwind)
-Hardcoded data inicial (sin upload aún)
-Wiringapplication:left_right_arrow: DOM
-Fase 5 — Calendario popup
+- Los datos y los vídeos cargados **no persisten**: al recargar la página se pierden, ya que `URL.createObjectURL()` genera una referencia temporal válida solo durante la sesión del navegador.
+- Existe un pequeño error en `cerrarReproductor()`: llama a `.add('hidden')` sobre `classList` en lugar de `classList.add('hidden')`, por lo que el reproductor no se oculta correctamente al pulsar "Cerrar Player".
+- No hay validación de tamaño/formato de archivo más allá del filtro `accept="video/*"` del input.
+- No existe backend: para producción sería necesario implementar subida real de archivos y persistencia (por ejemplo, una base de datos y almacenamiento de vídeos en servidor o en la nube).
 
-REDtests del componente popup (sin DOM real, mocks)
-GREENCalendarPopupComponent.ts
-Wiring: click día → emit fecha → re-render catálogo
-Fase 6 — Upload modal
+## Próximos pasos sugeridos
 
-REDtestsUploadModalComponentconFilemock
-GREENcomponente
-Generación miniatura del primer frame del vídeo
-
-
-Funcionalidades del MVP
-FeatureDescripciónCatálogo Netflix-styleHero + filas horizontales por categoríaFiltro por fechaClick icono calendario → popup → seleccionar día → catálogo se actualizaIndicador de fecha activaTexto en header: "Mostrando: Sábado, 20 de junio de 2026"Upload de vídeo localModal con form (atleta, categoría, ejercicio, archivo). Genera miniatura del primer frameReproductor integrado<video> nativo con blob URLEstado vacíoSi no hay vídeos en la fecha → invitación a añadir el primero
-Limitaciones MVP
-
-Vídeos NO persisten (blob URL muere al recargar)
-Categorías hardcoded (5 fijas)
-Sin búsqueda global
-Sin autenticación
-Solo desktop (responsive en fase posterior)
-
-
-Decisiones técnicas
-DecisiónPor quéTypeScript en domainTipado fuerte de entities y portsTailwind CDNCero build, prototipado rápidoIn-memory repoMVP sin backend; refactor a S3/IndexedDB en fase 2Hexagonal desde día 1Refactor a backend real solo cambia 1 adapterFunciones puras en domain/functions/Testables sin mocks ni DOM
-Comandos
-r# Setup
-npm init -y
-npm install --save-dev jest typescript ts-jest @types/jest
-
-# Run tests
-npm test
-
-# Run tests watch
-npm test -- --watch
-
-# Coverage
-npm test -- --coverage
-
-# Servir (cualquier static server)
-npx serve .
-
-Próximos pasos (después MVP)
-
-Persistencia real (IndexedDB para metadata + S3/local storage para vídeos)
-Backend con autenticación de entrenadores
-Subida real al servidor
-Categorías editables (CRUD)
-Búsqueda/filtros adicionales (atleta, categoría, rango de fechas)
-Soporte mobile / responsive
-
-
-Notas para retomar
-
-Antes de tocar código → leer este README entero
-Empezar siempre por la fase TDD donde quedaste
-Si saltas RED→GREEN sin verificación → STOP y replantea
-NO commitear sin permiso del usuario
+- Corregir el bug en `cerrarReproductor()`.
+- Añadir persistencia real (backend + base de datos, o almacenamiento en la nube).
+- Validar tipo y tamaño máximo de los vídeos antes de aceptarlos.
+- Soporte multiusuario / autenticación de entrenadores y atletas.
