@@ -176,8 +176,7 @@
       if (!file) return;
       const blobUrl = URL.createObjectURL(file);
       const videoInput = {
-        id: "vid-" + crypto.randomUUID(),
-        name: nameInput.value,
+        id: "vid-" + Date.now() + "-" + Math.random().toString(36).slice(2),        name: nameInput.value,
         category: categoryInput.value,
         date: (/* @__PURE__ */ new Date()).toISOString(),
         fileName: file.name,
