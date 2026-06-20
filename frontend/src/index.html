@@ -191,13 +191,12 @@
 
     <script type="module">
         // Importaciones de Infraestructura y Aplicación compiladas/procesadas
-        import { LocalStorageVideoRepository } from './modules/ddd/Trainer/infrastructure/LocalStorageVideoRepository.js';
-        import { UploadVideoUseCase } from './modules/ddd/Trainer/domain/application/UploadVideoUseCase.js';
-        import { GetVideosUseCase } from './modules/ddd/Trainer/domain/application/GetVideosUseCase.js';
+        import { LocalStorageVideoRepository } from './modules/ddd/Trainer/infrastructure/LocalStorageVideoRepository.ts';
+        import { GetVideosUseCase } from './modules/ddd/Trainer/application/GetVideosUseCase.ts';
 
         // 1. Instanciamos Componentes del Hexágono
         const repository = new LocalStorageVideoRepository();
-        const uploadVideoUseCase = new UploadVideoUseCase(repository);
+        const uploadVideoUseCase = new uploadVideoUseCase(repository);
         const getVideosUseCase = new GetVideosUseCase(repository);
 
         // Elementos del DOM

@@ -1,4 +1,3 @@
-// src/modules/ddd/Trainer/domain/application/GetVideosUseCase.ts
 import { VideoRepository } from '../domain/VideoRepository';
 import { groupByCategory, GroupedVideos } from '../functions/groupByCategory';
 
