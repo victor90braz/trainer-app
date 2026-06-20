@@ -64,3 +64,23 @@ export class Video {
         });
     }
 }
+
+export class VideoFactory {
+    public static create(primitives: {
+        id: string;
+        name: string;
+        category: string;
+        date: string;
+        fileName: string;
+        blobUrl: string;
+    }): Video {
+        return Video.fromPrimitive({
+            id: primitives.id,
+            name: primitives.name,
+            category: primitives.category,
+            date: primitives.date,
+            fileName: primitives.fileName,
+            blobUrl: primitives.blobUrl
+        });
+    }
+}
